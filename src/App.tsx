@@ -6,6 +6,7 @@ import AuthComponent from './reqresComponents/Auth';
 
 const App = () => (
     <>
+    <h1>Develop</h1>
     <UserComponent></UserComponent>
     <ResourceComponent></ResourceComponent>
     <AuthComponent></AuthComponent>
