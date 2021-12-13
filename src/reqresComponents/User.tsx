@@ -10,23 +10,39 @@ import '../styles/user.css'
 const userUrl = "https://reqres.in/api";
 
 const gerUsersUrlPrt = "/users?page=2";
+const gerUserUrlPrt = "/users/2";
+
+const initUser = {
+        id: 0,
+        email: "e",
+        first_name: "e",
+        last_name: "e",
+        avatar: "#",
+};
 
 const GetUsersComponent = () => {
 
-    const [users, setUser] = React.useState<IUser[]>([]);
+    const [users, setUsers] = React.useState<IUser[]>([]);
+    const [user, setUser] = React.useState<IUser>(initUser);
+
     const [listUsersButGet, setlistUsersButGet] = React.useState<boolean>(false);
+    const [singleUserButGet, setsingleUserButGet] = React.useState<boolean>(false);
 
     useEffect(() => {
 
         async function init() {
-            const resultGet = await get(gerUsersUrlPrt);
-            setUser(resultGet.data);
+            const resultGetUsers = await get<IUsersData>(gerUsersUrlPrt);
+            setUsers(resultGetUsers.data);
+
+            const resultGetUser = await get<IUserData>(gerUserUrlPrt);
+            setUser(resultGetUser.data);
         }
 
         init();
     }, [listUsersButGet]);
 
     const clickListUserGet = () => listUsersButGet ? setlistUsersButGet(false) : setlistUsersButGet(true);
+    const clickSingleUser = () => singleUserButGet ? setsingleUserButGet(false) : setsingleUserButGet(true);
 
     return <>
         <Card className="pre-card">
@@ -35,16 +51,30 @@ const GetUsersComponent = () => {
                 <Button variant="success" style={{ margin: '2px' }} onClick={clickListUserGet}>Get</Button>
             </Card.Body>
         </Card>
+
         <GetUsers users={users} show={listUsersButGet}></GetUsers>
+
+        <Card className="pre-card">
+            <Card.Body>
+                SINGLE USERS
+                <Button variant="success" style={{ margin: '2px' }} onClick={clickSingleUser}>Get</Button>
+            </Card.Body>
+        </Card>
+        <GetUser user={user} show={singleUserButGet}></GetUser>
     </>
 };
 
-interface IUserData {
+interface IUsersData {
     page: number,
     per_page: number,
     total: number,
     total_pages: number,
     data: IUser[],
+    support: ISupport
+}
+
+interface IUserData{
+    data: IUser,
     support: ISupport
 }
 
@@ -87,6 +117,27 @@ const GetUsers = (props: IGetUsers) => {
     }
 }
 
+interface IGetUser {
+    user: IUser,
+    show: boolean
+}
+
+const GetUser = (props: IGetUser) => {
+    if(props.show){
+    return <>
+        <User key={props.user.id} 
+        id={props.user.id} 
+        first_name={props.user.first_name}
+        last_name={props.user.last_name} 
+        email={props.user.email} 
+        avatar={props.user.avatar}></User>
+    </>
+    }
+    else{
+        return <></>
+    }
+}
+
 const User = (props: IUser) => (
     <>
         <Card style={{ width: '18rem' }}>
@@ -101,10 +152,9 @@ const User = (props: IUser) => (
     </>
 );
 
-async function get(props: string): Promise<IUserData> {
+async function get<T>(props: string): Promise<T> {
     const response = await fetch(`${userUrl}${props}`);
     return await response.json();
 }
-
 
 export { GetUsersComponent };
